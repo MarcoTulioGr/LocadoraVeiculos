@@ -17,6 +17,9 @@ namespace LocadoraVeiculos.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Lista todas as categorias de veículo com seus valores de diária base.
+        /// </summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<CategoriaVeiculo>>> Listar()
@@ -29,6 +32,10 @@ namespace LocadoraVeiculos.Controllers
             return Ok(categorias);
         }
 
+        /// <summary>
+        /// Obtém uma categoria específica pelo seu identificador.
+        /// </summary>
+        /// <param name="id">Identificador da categoria.</param>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -44,6 +51,10 @@ namespace LocadoraVeiculos.Controllers
             return Ok(categoria);
         }
 
+        /// <summary>
+        /// Cadastra uma nova categoria. O nome deve ser único e a diária base maior que zero.
+        /// </summary>
+        /// <param name="categoria">Dados da categoria a cadastrar.</param>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -67,6 +78,11 @@ namespace LocadoraVeiculos.Controllers
             return CreatedAtAction(nameof(ObterPorId), new { id = categoria.Id }, categoria);
         }
 
+        /// <summary>
+        /// Atualiza os dados de uma categoria existente.
+        /// </summary>
+        /// <param name="id">Identificador da categoria.</param>
+        /// <param name="categoria">Dados atualizados. O Id do corpo deve ser igual ao da URL.</param>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -99,6 +115,10 @@ namespace LocadoraVeiculos.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Exclui uma categoria. Recusada com 409 se houver veículos classificados nela.
+        /// </summary>
+        /// <param name="id">Identificador da categoria.</param>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

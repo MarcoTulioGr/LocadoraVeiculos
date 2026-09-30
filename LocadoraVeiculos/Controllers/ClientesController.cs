@@ -17,6 +17,9 @@ namespace LocadoraVeiculos.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Lista todos os clientes cadastrados, em ordem alfabética.
+        /// </summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Cliente>>> Listar()
@@ -29,6 +32,10 @@ namespace LocadoraVeiculos.Controllers
             return Ok(clientes);
         }
 
+        /// <summary>
+        /// Obtém um cliente pelo seu identificador.
+        /// </summary>
+        /// <param name="id">Identificador do cliente.</param>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -44,6 +51,10 @@ namespace LocadoraVeiculos.Controllers
             return Ok(cliente);
         }
 
+        /// <summary>
+        /// Cadastra um cliente. O CPF deve ser único e o e-mail precisa ter formato válido.
+        /// </summary>
+        /// <param name="cliente">Dados do cliente. Nome, CPF e e-mail são obrigatórios.</param>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -67,6 +78,11 @@ namespace LocadoraVeiculos.Controllers
             return CreatedAtAction(nameof(ObterPorId), new { id = cliente.Id }, cliente);
         }
 
+        /// <summary>
+        /// Atualiza os dados de um cliente existente.
+        /// </summary>
+        /// <param name="id">Identificador do cliente.</param>
+        /// <param name="cliente">Dados atualizados. O Id do corpo deve ser igual ao da URL.</param>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -94,6 +110,10 @@ namespace LocadoraVeiculos.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Exclui um cliente. Recusada com 409 se houver aluguéis registrados em seu nome.
+        /// </summary>
+        /// <param name="id">Identificador do cliente.</param>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

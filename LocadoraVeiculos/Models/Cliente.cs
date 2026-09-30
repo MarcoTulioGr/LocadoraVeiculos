@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace LocadoraVeiculos.Models
 {
@@ -27,6 +28,7 @@ namespace LocadoraVeiculos.Models
 
         public DateTime? DataNascimento { get; set; }
 
+        [JsonIgnore]
         public ICollection<Aluguel> Alugueis { get; set; } = new List<Aluguel>();
     }
 }

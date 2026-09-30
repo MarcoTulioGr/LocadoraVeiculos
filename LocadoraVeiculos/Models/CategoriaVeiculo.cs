@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LocadoraVeiculos.Models
@@ -18,6 +19,7 @@ namespace LocadoraVeiculos.Models
         [Column(TypeName = "decimal(10,2)")]
         public decimal ValorDiariaBase { get; set; }
 
+        [JsonIgnore]
         public ICollection<Veiculo> Veiculos { get; set; } = new List<Veiculo>();
     }
 }

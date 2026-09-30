@@ -16,7 +16,13 @@ namespace LocadoraVeiculos.Controllers
             _context = context;
         }
 
-        // FILTRO 1 - INNER JOIN entre Veiculo, Fabricante e CategoriaVeiculo
+        /// <summary>
+        /// Filtro 1 - Frota completa (INNER JOIN entre Veículo, Fabricante e Categoria). Todos os parâmetros são opcionais e podem ser combinados.
+        /// </summary>
+        /// <param name="fabricante">Filtra pelo nome do fabricante (busca parcial).</param>
+        /// <param name="categoria">Filtra pelo nome da categoria (busca parcial).</param>
+        /// <param name="disponivel">true para disponíveis, false para alugados.</param>
+        /// <param name="anoMinimo">Retorna apenas veículos de ano igual ou superior.</param>
         [HttpGet("veiculos")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> FiltrarVeiculos(
@@ -62,7 +68,10 @@ namespace LocadoraVeiculos.Controllers
             return Ok(new { total = resultado.Count, dados = resultado });
         }
 
-        // FILTRO 2 - LEFT JOIN: todos os clientes, inclusive os que nunca alugaram
+        /// <summary>
+        /// Filtro 2 - Clientes e seu histórico de locações (LEFT JOIN). Retorna todos os clientes, inclusive os que nunca alugaram.
+        /// </summary>
+        /// <param name="somenteSemAluguel">true para listar apenas clientes sem nenhum aluguel.</param>
         [HttpGet("clientes-e-alugueis")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ClientesEAlugueis([FromQuery] bool? somenteSemAluguel)
@@ -91,7 +100,9 @@ namespace LocadoraVeiculos.Controllers
             return Ok(new { total = resultado.Count, dados = resultado });
         }
 
-        // FILTRO 3 - INNER JOIN entre Aluguel, Cliente e Veiculo
+        /// <summary>
+        /// Filtro 3 - Aluguéis em andamento (INNER JOIN entre Aluguel, Cliente e Veículo). Calcula dias contratados e eventual atraso.
+        /// </summary>
         [HttpGet("alugueis-em-aberto")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> AlugueisEmAberto()
@@ -134,7 +145,9 @@ namespace LocadoraVeiculos.Controllers
             return Ok(new { total = resultado.Count, dados = resultado });
         }
 
-        // FILTRO 4 - INNER JOIN com agregacao por categoria
+        /// <summary>
+        /// Filtro 4 - Faturamento e quilometragem por categoria (INNER JOIN com agregação). Considera apenas locações encerradas.
+        /// </summary>
         [HttpGet("faturamento-por-categoria")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> FaturamentoPorCategoria()
@@ -162,7 +175,9 @@ namespace LocadoraVeiculos.Controllers
             });
         }
 
-        // FILTRO 5 - LEFT JOIN com DefaultIfEmpty: veiculos que nunca foram alugados
+        /// <summary>
+        /// Filtro 5 - Veículos ociosos (LEFT JOIN com DefaultIfEmpty). Lista os carros que nunca foram alugados.
+        /// </summary>
         [HttpGet("veiculos-nunca-alugados")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> VeiculosNuncaAlugados()
@@ -189,7 +204,9 @@ namespace LocadoraVeiculos.Controllers
             return Ok(new { total = resultado.Count, dados = resultado });
         }
 
-        // FILTRO 6 - INNER JOIN: devolucoes entregues depois do prazo
+        /// <summary>
+        /// Filtro 6 - Devoluções entregues após o prazo (INNER JOIN). Ordenado pelo maior atraso.
+        /// </summary>
         [HttpGet("devolucoes-em-atraso")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> DevolucoesEmAtraso()

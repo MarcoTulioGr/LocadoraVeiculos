@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace LocadoraVeiculos.Models
 {
@@ -33,6 +34,7 @@ namespace LocadoraVeiculos.Models
         public int CategoriaVeiculoId { get; set; }
         public CategoriaVeiculo CategoriaVeiculo { get; set; } = null!;
 
+        [JsonIgnore]
         public ICollection<Aluguel> Alugueis { get; set; } = new List<Aluguel>();
     }
 }

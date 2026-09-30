@@ -17,6 +17,9 @@ namespace LocadoraVeiculos.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Lista todos os veículos da frota, já com fabricante e categoria carregados.
+        /// </summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Veiculo>>> Listar()
@@ -31,6 +34,10 @@ namespace LocadoraVeiculos.Controllers
             return Ok(veiculos);
         }
 
+        /// <summary>
+        /// Obtém um veículo pelo identificador, com fabricante e categoria.
+        /// </summary>
+        /// <param name="id">Identificador do veículo.</param>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -48,6 +55,10 @@ namespace LocadoraVeiculos.Controllers
             return Ok(veiculo);
         }
 
+        /// <summary>
+        /// Cadastra um veículo. A placa deve ser única, e o fabricante e a categoria informados precisam existir.
+        /// </summary>
+        /// <param name="veiculo">Dados do veículo a cadastrar.</param>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -75,6 +86,11 @@ namespace LocadoraVeiculos.Controllers
             return CreatedAtAction(nameof(ObterPorId), new { id = veiculo.Id }, veiculo);
         }
 
+        /// <summary>
+        /// Atualiza os dados de um veículo existente.
+        /// </summary>
+        /// <param name="id">Identificador do veículo.</param>
+        /// <param name="veiculo">Dados atualizados. O Id do corpo deve ser igual ao da URL.</param>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -111,6 +127,10 @@ namespace LocadoraVeiculos.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Exclui um veículo. Recusada com 409 se houver aluguéis registrados para ele.
+        /// </summary>
+        /// <param name="id">Identificador do veículo.</param>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

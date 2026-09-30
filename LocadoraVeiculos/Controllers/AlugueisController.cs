@@ -17,6 +17,9 @@ namespace LocadoraVeiculos.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Lista todos os aluguéis, do mais recente para o mais antigo, com cliente e veículo.
+        /// </summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Aluguel>>> Listar()
@@ -31,6 +34,10 @@ namespace LocadoraVeiculos.Controllers
             return Ok(alugueis);
         }
 
+        /// <summary>
+        /// Obtém um aluguel pelo identificador, com cliente e veículo carregados.
+        /// </summary>
+        /// <param name="id">Identificador do aluguel.</param>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -48,6 +55,10 @@ namespace LocadoraVeiculos.Controllers
             return Ok(aluguel);
         }
 
+        /// <summary>
+        /// Registra um novo aluguel. O veículo precisa estar livre; a quilometragem inicial é lida do veículo e, se a diária não for informada, vem da categoria.
+        /// </summary>
+        /// <param name="aluguel">Dados do aluguel. Exige cliente, veículo e o período de locação.</param>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -96,6 +107,11 @@ namespace LocadoraVeiculos.Controllers
             return CreatedAtAction(nameof(ObterPorId), new { id = aluguel.Id }, aluguel);
         }
 
+        /// <summary>
+        /// Atualiza os dados de um aluguel existente.
+        /// </summary>
+        /// <param name="id">Identificador do aluguel.</param>
+        /// <param name="aluguel">Dados atualizados. O Id do corpo deve ser igual ao da URL.</param>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -127,6 +143,11 @@ namespace LocadoraVeiculos.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Registra a devolução do veículo: calcula os dias cobrados e o valor total, atualiza a quilometragem do carro e o devolve à frota como disponível.
+        /// </summary>
+        /// <param name="id">Identificador do aluguel em aberto.</param>
+        /// <param name="devolucao">Data da devolução, quilometragem final e observações.</param>
         [HttpPost("{id:int}/devolucao")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -180,6 +201,10 @@ namespace LocadoraVeiculos.Controllers
             });
         }
 
+        /// <summary>
+        /// Exclui um aluguel. Se ele estava em aberto, o veículo volta a ficar disponível.
+        /// </summary>
+        /// <param name="id">Identificador do aluguel.</param>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
