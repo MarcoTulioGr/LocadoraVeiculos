@@ -1,4 +1,5 @@
-﻿--  LOCADORA DE VEICULOS - POVOAMENTO DO BANCO
+﻿
+--  LOCADORA DE VEICULOS - POVOAMENTO DO BANCO
 --  Etapa 2 do escopo: criacao de registros
 
 USE LocadoraVeiculosDb;
