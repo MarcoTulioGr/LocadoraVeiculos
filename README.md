@@ -79,3 +79,44 @@ Docs/
 
 ### Wireframes
 [Ver wireframes](https://claude.ai/artifact/CtE9Hfm8YQ1qvLtKHZv8s5#play-d36327ea7ea5)
+
+### Como rodar
+
+O front-end fica em `frontend/` e usa HTML, Bootstrap 5.3.3 (via CDN) e JavaScript puro, sem
+framework e sem etapa de build.
+
+1. Suba a API na porta HTTP:
+   ```
+   dotnet run --project LocadoraVeiculos --launch-profile http
+   ```
+   Ela fica disponível em `http://localhost:5207` (o endereço está em `frontend/js/api.js`).
+2. Abra a pasta `frontend/` no VS Code e clique em **Go Live** (extensão Live Server), ou
+   clique com o botão direito em `index.html` → **Open with Live Server**.
+3. O navegador abre em `http://127.0.0.1:5500`. O CORS da API já libera essa origem.
+
+### Telas
+
+- **Início** (`index.html`): cards de resumo (frota, disponíveis, aluguéis em aberto,
+  faturamento) e lista de aluguéis em aberto.
+- **Fabricantes** (`fabricantes.html`): cadastro, edição e exclusão; filtro por nome e país.
+- **Categorias** (`categorias.html`): cadastro, edição e exclusão; filtro por nome e faixa de diária.
+- **Veículos** (`veiculos.html`): cadastro, edição e exclusão; filtro por fabricante, categoria,
+  situação e ano mínimo.
+- **Clientes** (`clientes.html`): cadastro, edição e exclusão; filtro por nome, CPF e
+  "somente sem aluguel".
+- **Aluguéis** (`alugueis.html`): novo aluguel, edição, exclusão e devolução; filtro por
+  cliente, status e período de retirada.
+- **Relatórios** (`relatorios.html`): faturamento por categoria, devoluções em atraso,
+  veículos nunca alugados e clientes x aluguéis.
+
+### Rotas usadas por tela
+
+| Tela | Rotas |
+|---|---|
+| Início | `GET /api/veiculos`, `GET /api/filtros/alugueis-em-aberto`, `GET /api/filtros/faturamento-por-categoria` |
+| Fabricantes | `GET`, `POST /api/fabricantes`, `PUT`, `DELETE /api/fabricantes/{id}` |
+| Categorias | `GET`, `POST /api/categoriasveiculo`, `PUT`, `DELETE /api/categoriasveiculo/{id}` |
+| Veículos | `GET /api/filtros/veiculos`, `GET /api/fabricantes`, `GET /api/categoriasveiculo`, `GET`, `PUT`, `DELETE /api/veiculos/{id}`, `POST /api/veiculos` |
+| Clientes | `GET /api/clientes`, `GET /api/filtros/clientes-e-alugueis`, `POST /api/clientes`, `PUT`, `DELETE /api/clientes/{id}` |
+| Aluguéis | `GET`, `POST /api/alugueis`, `GET`, `PUT`, `DELETE /api/alugueis/{id}`, `POST /api/alugueis/{id}/devolucao`, `GET /api/clientes`, `GET /api/filtros/veiculos?disponivel=true` |
+| Relatórios | `GET /api/filtros/faturamento-por-categoria`, `GET /api/filtros/devolucoes-em-atraso`, `GET /api/filtros/veiculos-nunca-alugados`, `GET /api/filtros/clientes-e-alugueis` |
