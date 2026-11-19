@@ -1,0 +1,44 @@
+body {
+  background: #f5f5f5;
+  color: #222;
+}
+
+
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: #fff;
+  border-right: 1px solid #d9d9d9;
+  padding: 24px 16px;
+  flex-shrink: 0;
+}
+.sidebar .marca {
+  font-weight: 700;
+  font-size: 18px;
+  padding: 0 8px 20px;
+}
+.sidebar a {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 6px;
+  color: #444;
+  text-decoration: none;
+}
+.sidebar a:hover  { background: #eee; }
+.sidebar a.ativo  { background: #333; color: #fff; font-weight: 600; }
+
+
+.card-resumo .valor { font-size: 28px; font-weight: 700; }
+
+
+.table thead th {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #555;
+  background: #ebebeb;
+}
+
+@media (max-width: 768px) {
+  .layout  { flex-direction: column; }
+  .sidebar { width: 100%; min-height: auto; }
+}
