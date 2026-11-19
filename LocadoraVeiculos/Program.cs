@@ -49,9 +49,20 @@ builder.Services.AddSwaggerGen(options =>
         options.IncludeXmlComments(xml);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontEnd", policy =>
+    {
+        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseCors("FrontEnd");
 
 if (app.Environment.IsDevelopment())
 {
