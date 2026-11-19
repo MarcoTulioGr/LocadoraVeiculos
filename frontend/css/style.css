@@ -28,8 +28,11 @@ body {
 .sidebar a.ativo  { background: #333; color: #fff; font-weight: 600; }
 
 
-.card-resumo .valor { font-size: 28px; font-weight: 700; }
-
+.card-resumo .valor {
+  font-size: 26px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
 .table thead th {
   font-size: 12px;
