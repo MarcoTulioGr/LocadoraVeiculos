@@ -74,3 +74,8 @@ Docs/
 | 2 | Implementação do backend | Entregue |
 | 3 | Testes e documentação | Entregue |
 | 4 | Vídeo de apresentação | Entregue |
+
+## Parte 2 - Front-end
+
+### Wireframes
+[Ver wireframes](https://claude.ai/artifact/CtE9Hfm8YQ1qvLtKHZv8s5#play-d36327ea7ea5)
