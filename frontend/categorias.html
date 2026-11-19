@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categorias - Locadora de Veículos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+  <div class="d-flex layout">
+    <nav id="menu" class="sidebar"></nav>
+
+    <main class="flex-grow-1 p-4">
+      <div id="mensagens"></div>
+
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <h1 class="h3 mb-1">Categorias de veículo</h1>
+          <p class="text-secondary m-0">Tabela de preços por categoria</p>
+        </div>
+        <button class="btn btn-dark" onclick="abrirNovo()">+ Nova categoria</button>
+      </div>
+
+      <div class="card p-3 mb-3">
+        <div class="d-flex justify-content-between mb-2">
+          <strong>Filtros</strong>
+          <code class="small text-secondary">GET /api/categoriasveiculo</code>
+        </div>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label for="filtroNome" class="form-label small fw-semibold">Nome</label>
+            <input id="filtroNome" class="form-control" placeholder="Ex.: SUV">
+          </div>
+          <div class="col-md-2">
+            <label for="filtroMin" class="form-label small fw-semibold">Diária mínima (R$)</label>
+            <input id="filtroMin" type="number" min="0" step="0.01" class="form-control">
+          </div>
+          <div class="col-md-2">
+            <label for="filtroMax" class="form-label small fw-semibold">Diária máxima (R$)</label>
+            <input id="filtroMax" type="number" min="0" step="0.01" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <button class="btn btn-outline-dark" onclick="limparFiltros()">Limpar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover bg-white border align-middle">
+          <thead>
+            <tr><th>ID</th><th>Nome</th><th>Descrição</th><th>Diária base</th><th class="text-end">Ações</th></tr>
+          </thead>
+          <tbody id="tabela">
+            <tr><td colspan="5" class="text-center">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p id="contador" class="small text-secondary"></p>
+    </main>
+  </div>
+
+  <!-- Modal de cadast-->
+  <div class="modal fade" id="modalForm" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" id="formCategoria" novalidate>
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="tituloModal">Nova categoria</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="campoNome" class="form-label">Nome *</label>
+            <input id="campoNome" class="form-control" required maxlength="40">
+            <div class="invalid-feedback">Informe o nome (até 40 caracteres).</div>
+          </div>
+          <div class="mb-3">
+            <label for="campoDescricao" class="form-label">Descrição</label>
+            <textarea id="campoDescricao" class="form-control" rows="2" maxlength="200"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="campoDiaria" class="form-label">Valor da diária base (R$) *</label>
+            <input id="campoDiaria" type="number" class="form-control" required min="0.01" step="0.01">
+            <div class="invalid-feedback">Informe um valor maior que zero.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!--confirmar exclusão -->
+  <div class="modal fade" id="modalExcluir" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5">Confirmar exclusão</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">Deseja excluir a categoria <strong id="nomeExcluir"></strong>?</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" onclick="confirmarExclusao()">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/categorias.js"></script>
+</body>
+</html>

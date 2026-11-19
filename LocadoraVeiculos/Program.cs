@@ -53,8 +53,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontEnd", policy =>
     {
-        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500")
-              .AllowAnyHeader()
+        if (builder.Environment.IsDevelopment())
+            policy.AllowAnyOrigin();
+        else
+            policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500");
+
+        policy.AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
