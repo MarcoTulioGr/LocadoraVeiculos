@@ -14,6 +14,7 @@
     <main class="flex-grow-1 p-4">
       <div id="mensagens"></div>
 
+      <!-- Cabeçalho -->
       <div class="d-flex justify-content-between align-items-end mb-4">
         <div>
           <h1 class="h3 mb-1">Fabricantes</h1>
@@ -22,6 +23,7 @@
         <button class="btn btn-dark" onclick="abrirNovo()">+ Novo fabricante</button>
       </div>
 
+      <!-- Filtros -->
       <div class="card p-3 mb-3">
         <div class="d-flex justify-content-between mb-2">
           <strong>Filtros</strong>
@@ -42,6 +44,7 @@
         </div>
       </div>
 
+      <!-- Tabela -->
       <div class="table-responsive">
         <table class="table table-hover bg-white border align-middle">
           <thead>
@@ -56,6 +59,49 @@
     </main>
   </div>
 
+  <div class="modal fade" id="modalFabricante" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" id="formFabricante" novalidate>
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="tituloModal">Novo fabricante</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="campoNome" class="form-label">Nome *</label>
+            <input id="campoNome" class="form-control" required maxlength="60">
+            <div class="invalid-feedback">Informe o nome (até 60 caracteres).</div>
+          </div>
+          <div class="mb-3">
+            <label for="campoPais" class="form-label">País de origem</label>
+            <input id="campoPais" class="form-control" maxlength="50">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalExcluir" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5">Confirmar exclusão</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          Deseja excluir o fabricante <strong id="nomeExcluir"></strong>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" onclick="confirmarExclusao()">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/api.js"></script>
