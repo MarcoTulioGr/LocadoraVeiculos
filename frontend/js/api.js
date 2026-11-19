@@ -54,3 +54,10 @@ function mostrarMensagem(texto, tipo = "success") {
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
     </div>`;
 }
+
+function normalizar(texto) {
+  return (texto ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
