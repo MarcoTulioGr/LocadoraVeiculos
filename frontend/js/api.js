@@ -1,6 +1,5 @@
 const API_URL = "http://localhost:5207/api";
 
-// Função central: todas as chamadas à API passam por aqui
 async function api(caminho, opcoes = {}) {
   const resposta = await fetch(API_URL + caminho, {
     headers: { "Content-Type": "application/json" },
@@ -11,7 +10,6 @@ async function api(caminho, opcoes = {}) {
 
   const dados = await resposta.json().catch(() => null);
 
-  // 400, 404, 409, 500: transforma em erro com a mensagem da API
   if (!resposta.ok) {
     throw new Error(extrairErro(dados, resposta.status));
   }
@@ -60,4 +58,26 @@ function normalizar(texto) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
+}
+
+
+function hojeISO() {
+  const d = new Date();
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
+function somarDias(iso, quantidade) {
+  const d = new Date(iso.substring(0, 10) + "T12:00:00");
+  d.setDate(d.getDate() + quantidade);
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
+// diferenca em dias entre duas datas (so a parte yyyy-mm-dd)
+function diasEntre(inicio, fim) {
+  const ms = Date.parse(fim.substring(0, 10)) - Date.parse(inicio.substring(0, 10));
+  return Math.round(ms / 86400000);
 }
