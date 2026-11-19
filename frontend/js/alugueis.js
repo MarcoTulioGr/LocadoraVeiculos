@@ -2,10 +2,13 @@ let alugueis = [];
 let veiculosDisponiveis = [];
 let aluguelEmEdicao = null;
 let idParaExcluir = null;
+let aluguelDevolucao = null;
 
-const modalForm    = new bootstrap.Modal(document.getElementById("modalForm"));
-const modalExcluir = new bootstrap.Modal(document.getElementById("modalExcluir"));
-const form         = document.getElementById("formAluguel");
+const modalForm      = new bootstrap.Modal(document.getElementById("modalForm"));
+const modalExcluir   = new bootstrap.Modal(document.getElementById("modalExcluir"));
+const modalDevolucao = new bootstrap.Modal(document.getElementById("modalDevolucao"));
+const form           = document.getElementById("formAluguel");
+const formDevolucao  = document.getElementById("formDevolucao");
 
 // lista
 async function carregar() {
@@ -249,5 +252,88 @@ async function confirmarExclusao() {
   }
   modalExcluir.hide();
 }
+
+// devolucao
+function abrirDevolucao(id) {
+  const a = alugueis.find(x => x.id === id);
+  aluguelDevolucao = a;
+  const retirada = a.dataRetirada.substring(0, 10);
+  const info = (rotulo, valor) =>
+    `<div class="col-md-4"><span class="text-secondary">${rotulo}</span><br><strong>${valor}</strong></div>`;
+
+  document.getElementById("tituloDevolucao").textContent = `Registrar devolução do aluguel #${a.id}`;
+  document.getElementById("rotaDevolucao").textContent = `POST /api/alugueis/${a.id}/devolucao`;
+  document.getElementById("infoDevolucao").innerHTML =
+    info("Cliente", escapar(a.cliente.nome)) +
+    info("Veículo", `${escapar(a.veiculo.modelo)} · ${escapar(a.veiculo.placa)}`) +
+    info("Diária", formatarMoeda(a.valorDiaria)) +
+    info("Retirada", formatarData(a.dataRetirada)) +
+    info("Prevista", formatarData(a.dataPrevistaDevolucao)) +
+    info("Km inicial", a.kmInicial.toLocaleString("pt-BR"));
+
+  formDevolucao.reset();
+  formDevolucao.classList.remove("was-validated");
+  const campoData = document.getElementById("campoDataDevolucao");
+  campoData.min   = retirada;
+  campoData.value = hojeISO() < retirada ? retirada : hojeISO();
+  const campoKm = document.getElementById("campoKmFinal");
+  campoKm.min   = a.kmInicial;
+  campoKm.value = a.kmInicial;
+  atualizarPrevia();
+  modalDevolucao.show();
+}
+
+// previa so para conferencia, o valor oficial vem da api
+function atualizarPrevia() {
+  const a       = aluguelDevolucao;
+  const data    = document.getElementById("campoDataDevolucao").value;
+  const kmFinal = document.getElementById("campoKmFinal").value;
+  const previa  = document.getElementById("previaDevolucao");
+
+  if (!a || !data || kmFinal === "") {
+    previa.textContent = "Preencha a data e o km final para ver a prévia.";
+    return;
+  }
+
+  const dias   = Math.max(1, diasEntre(a.dataRetirada, data));
+  const km     = Number(kmFinal) - a.kmInicial;
+  const atraso = diasEntre(a.dataPrevistaDevolucao, data);
+
+  previa.innerHTML =
+    `Prévia: ${dias} dia(s) · ${km.toLocaleString("pt-BR")} km rodados · ` +
+    `<strong>${formatarMoeda(dias * a.valorDiaria)}</strong>` +
+    (atraso > 0 ? ` <span class="badge bg-dark">${atraso} dia(s) de atraso</span>` : "");
+}
+
+document.getElementById("campoDataDevolucao").addEventListener("change", atualizarPrevia);
+document.getElementById("campoKmFinal").addEventListener("input", atualizarPrevia);
+
+formDevolucao.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  if (!formDevolucao.checkValidity()) {
+    formDevolucao.classList.add("was-validated");
+    return;
+  }
+
+  const a    = aluguelDevolucao;
+  const data = document.getElementById("campoDataDevolucao").value;
+  // no mesmo dia da retirada manda o horario dela, senao a api acha que e antes da retirada
+  const dataEnvio = data === a.dataRetirada.substring(0, 10) ? a.dataRetirada : data;
+
+  try {
+    const r = await apiPost(`/alugueis/${a.id}/devolucao`, {
+      dataDevolucaoReal: dataEnvio,
+      kmFinal: Number(document.getElementById("campoKmFinal").value),
+      observacoes: document.getElementById("campoObsDevolucao").value.trim() || null,
+    });
+    mostrarMensagem(
+      `Devolução do aluguel #${r.id} registrada: ${r.diasCobrados} dia(s) × ${formatarMoeda(r.valorDiaria)} = ` +
+      `${formatarMoeda(r.valorTotal)} · ${r.kmRodados.toLocaleString("pt-BR")} km rodados.`);
+    carregar();
+  } catch (erro) {
+    mostrarMensagem(erro.message, "danger");
+  }
+  modalDevolucao.hide();
+});
 
 carregar();

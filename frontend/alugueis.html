@@ -124,6 +124,47 @@
     </div>
   </div>
 
+  <!-- devolução -->
+  <div class="modal fade" id="modalDevolucao" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <form class="modal-content" id="formDevolucao" novalidate>
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="tituloDevolucao">Registrar devolução</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex justify-content-end mb-2">
+            <code class="small text-secondary" id="rotaDevolucao">POST /api/alugueis/{id}/devolucao</code>
+          </div>
+          <div class="row g-2 small mb-3" id="infoDevolucao"></div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="campoDataDevolucao" class="form-label">Data da devolução *</label>
+              <input id="campoDataDevolucao" type="date" class="form-control" required>
+              <div class="invalid-feedback">Não pode ser antes da retirada.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="campoKmFinal" class="form-label">Km final *</label>
+              <input id="campoKmFinal" type="number" class="form-control" required>
+              <div class="invalid-feedback">Não pode ser menor que o km inicial.</div>
+            </div>
+            <div class="col-12">
+              <label for="campoObsDevolucao" class="form-label">Observações</label>
+              <textarea id="campoObsDevolucao" class="form-control" rows="2" maxlength="300"></textarea>
+            </div>
+            <div class="col-12">
+              <div class="card p-2 bg-light small" id="previaDevolucao">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark">Confirmar devolução</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- confirmar exclusão -->
   <div class="modal fade" id="modalExcluir" tabindex="-1">
     <div class="modal-dialog">
