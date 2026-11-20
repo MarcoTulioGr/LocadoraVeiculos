@@ -1,0 +1,245 @@
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+\usepackage{graphicx,url}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{xurl}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible,
+  keywordstyle=\bfseries,
+  showstringspaces=false
+}
+
+\newcommand{\tela}[3]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{figuras/#1.png}%
+      {\includegraphics[width=0.95\textwidth]{figuras/#1.png}}%
+      {\fbox{\parbox[c][4cm][c]{0.9\textwidth}{\centering\textit{inserir print: figuras/#1.png}}}}
+    \caption{#2}
+    \label{#3}
+  \end{figure}
+}
+
+\title{Sistema de Locadora de Veículos:\\Front-end Integrado à API REST}
+
+\author{Marco Túlio}
+
+\address{Tecnologias para Análise e Desenvolvimento de Sistemas\\
+  Trabalho Prático -- Parte 2 (Front-end)}
+
+\begin{document}
+\sloppy
+
+\maketitle
+
+\section{Descrição do problema}
+
+Uma locadora de veículos precisa controlar a sua frota, os seus clientes e as locações realizadas. No dia a dia, o atendente precisa saber quais carros estão disponíveis, registrar a retirada de um veículo por um cliente, acompanhar as locações em andamento (inclusive as atrasadas) e, na devolução, calcular o valor a ser cobrado de acordo com os dias de uso e o valor da diária da categoria do carro. A gerência, por sua vez, precisa de relatórios como o faturamento por categoria e as devoluções feitas fora do prazo.
+
+Na primeira parte do trabalho foi desenvolvida uma API RESTful em ASP.NET Core 8, com Entity Framework Core e SQL Server Express, contendo o banco de dados, o povoamento com dados fictícios, as rotas de CRUD de todas as entidades e seis rotas de consulta com junções. Esta segunda parte apresenta o front-end que consome essa API, permitindo que todas as funcionalidades sejam usadas por meio de telas, sem a necessidade de ferramentas como o Swagger.
+
+\section{Modelagem adotada}
+
+O sistema possui cinco entidades, apresentadas na Tabela~\ref{tab:entidades}. Um veículo pertence a um fabricante e a uma categoria; um aluguel liga um cliente a um veículo. A categoria define o valor da diária base, que é herdado pelo aluguel no momento da locação.
+
+\begin{table}[H]
+\centering
+\caption{Entidades do sistema e seus principais campos}
+\label{tab:entidades}
+\begin{tabular}{|l|p{9.5cm}|}
+\hline
+\textbf{Entidade} & \textbf{Principais campos} \\ \hline
+Fabricante & Nome, País de origem \\ \hline
+CategoriaVeiculo & Nome, Descrição, Valor da diária base \\ \hline
+Veiculo & Placa, Modelo, Ano, Quilometragem, Cor, Disponível, Fabricante (FK), Categoria (FK) \\ \hline
+Cliente & Nome, CPF, E-mail, Telefone, CNH, Data de nascimento \\ \hline
+Aluguel & Cliente (FK), Veículo (FK), Retirada, Devolução prevista, Devolução real, Km inicial, Km final, Diária, Valor total, Observações \\ \hline
+\end{tabular}
+\end{table}
+
+As principais regras de negócio, implementadas no back-end e respeitadas pelo front-end, são:
+\begin{itemize}
+  \item um veículo só pode ser alugado se não houver outro aluguel em aberto para ele (resposta 409);
+  \item ao abrir um aluguel, a quilometragem inicial é lida do veículo e a diária vem da categoria, e o veículo passa a ficar indisponível;
+  \item na devolução, o valor total é calculado como \textit{dias de uso $\times$ diária}, com cobrança mínima de um dia, e o veículo volta a ficar disponível com a quilometragem atualizada;
+  \item não é possível excluir fabricantes, categorias, veículos ou clientes que possuam registros dependentes (resposta 409).
+\end{itemize}
+
+\section{Wireframes}
+
+Antes da implementação, foram criados wireframes de média fidelidade em tons de cinza para guiar o desenvolvimento. Foram desenhadas onze telas: Início, Fabricantes, Categorias, Veículos, Clientes, Aluguéis e Relatórios, além das janelas de cadastro/edição, novo aluguel, devolução e confirmação de exclusão. Cada wireframe já indica a rota da API que será usada pela tela e os filtros de cada entidade, preenchidos com dados do povoamento da primeira parte.
+
+
+\tela{wireframes}{Visão geral dos wireframes}{fig:wireframes}
+
+\section{Arquitetura do front-end}
+
+O front-end foi desenvolvido com HTML, CSS, JavaScript puro e Bootstrap 5, sem etapa de compilação. Cada tela é uma página HTML com o seu próprio arquivo JavaScript, e todas compartilham três arquivos comuns. O código fica na pasta \texttt{frontend/}, ao lado da pasta do back-end, mantendo a estrutura do repositório da primeira parte:
+
+\begin{lstlisting}
+LocadoraVeiculos/
+|-- Docs/
+|-- LocadoraVeiculos/        (back-end - parte 1)
+|-- frontend/                (front-end - parte 2)
+|   |-- css/style.css
+|   |-- js/api.js            (comunicacao com a API)
+|   |-- js/layout.js         (menu lateral)
+|   |-- js/inicio.js, fabricantes.js, categorias.js,
+|   |   veiculos.js, clientes.js, alugueis.js, relatorios.js
+|   |-- index.html, fabricantes.html, categorias.html,
+|       veiculos.html, clientes.html, alugueis.html, relatorios.html
+\end{lstlisting}
+
+O arquivo \texttt{api.js} centraliza toda a comunicação com o back-end. Ele define o endereço base da API, uma função que executa o \texttt{fetch}, trata as respostas sem corpo (204) e transforma as respostas de erro (400, 404, 409 e 500) em mensagens exibidas ao usuário, usando o texto que o próprio back-end devolve. Também contém funções auxiliares de formatação de moeda e data e uma função que escapa textos antes de exibi-los, evitando que dados cadastrados sejam interpretados como HTML.
+
+\begin{lstlisting}[language=Java]
+const API_URL = "http://localhost:5207/api";
+
+async function api(caminho, opcoes = {}) {
+  const resposta = await fetch(API_URL + caminho, {
+    headers: { "Content-Type": "application/json" }, ...opcoes });
+  if (resposta.status === 204) return null;
+  const dados = await resposta.json().catch(() => null);
+  if (!resposta.ok) throw new Error(extrairErro(dados, resposta.status));
+  return dados;
+}
+\end{lstlisting}
+
+Como o front-end (porta 5500) e a API (porta 5207) rodam em origens diferentes, foi necessário habilitar o CORS no \texttt{Program.cs} do back-end, liberando a origem do front-end para os métodos GET, POST, PUT e DELETE. Essa foi a única alteração feita no back-end.
+
+Todas as telas seguem o mesmo padrão: cabeçalho com botão de cadastro, painel de filtros, tabela com os registros vindos da API, janela modal de cadastro e edição com validação dos campos obrigatórios e janela de confirmação de exclusão. Após qualquer inclusão, alteração ou exclusão, a lista é recarregada a partir da API, de forma que a tela sempre reflete o conteúdo do banco de dados.
+
+\section{Telas desenvolvidas}
+
+A Tabela~\ref{tab:telas} resume as funcionalidades de cada entidade, os filtros disponíveis e as rotas utilizadas. Todas as entidades possuem cadastro, edição, exclusão e pesquisa com filtros em pelo menos dois campos.
+
+\begin{table}[H]
+\centering
+\caption{Telas, filtros e rotas utilizadas}
+\label{tab:telas}
+\footnotesize
+\begin{tabular}{|p{2.2cm}|p{4.3cm}|p{7cm}|}
+\hline
+\textbf{Tela} & \textbf{Filtros} & \textbf{Rotas} \\ \hline
+Início & -- & GET /api/veiculos, /api/filtros/alugueis-em-aberto, /api/filtros/faturamento-por-categoria \\ \hline
+Fabricantes & Nome, país de origem & GET, POST, PUT, DELETE /api/fabricantes \\ \hline
+Categorias & Nome, diária mínima e máxima & GET, POST, PUT, DELETE /api/categoriasveiculo \\ \hline
+Veículos & Fabricante, categoria, situação, ano mínimo & GET /api/filtros/veiculos; GET /api/veiculos/\{id\}; POST, PUT, DELETE /api/veiculos \\ \hline
+Clientes & Nome, CPF, somente sem aluguel & GET /api/clientes, /api/filtros/clientes-e-alugueis; POST, PUT, DELETE /api/clientes \\ \hline
+Aluguéis & Cliente, status, período de retirada & GET, POST, PUT, DELETE /api/alugueis; POST /api/alugueis/\{id\}/devolucao; GET /api/filtros/veiculos?disponivel=true \\ \hline
+Relatórios & Somente sem aluguel & GET /api/filtros/faturamento-por-categoria, /devolucoes-em-atraso, /veiculos-nunca-alugados, /clientes-e-alugueis \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Início}
+A tela inicial apresenta um resumo da locadora em quatro indicadores (total da frota, veículos disponíveis, aluguéis em aberto e faturamento das locações encerradas) e a lista dos aluguéis em andamento, destacando os que já passaram da data prevista de devolução.
+
+\tela{inicio}{Tela inicial com indicadores e aluguéis em aberto}{fig:inicio}
+
+\subsection{Fabricantes, Categorias e Clientes}
+Essas telas permitem o cadastro completo das entidades. Os filtros de fabricante (nome e país) e de categoria (nome e faixa de diária) são aplicados enquanto o usuário digita, desconsiderando maiúsculas e acentos. A tela de clientes combina duas rotas: os dados cadastrais vêm de \path|/api/clientes| e o histórico de cada cliente (total de aluguéis, aluguéis em aberto e valor gasto) vem da consulta com LEFT JOIN exposta em \path|/api/filtros/clientes-e-alugueis|. A opção ``somente clientes sem aluguel'' é enviada ao servidor como parâmetro da rota.
+
+\tela{fabricantes}{Tela de fabricantes com filtros}{fig:fabricantes}
+\tela{clientes}{Tela de clientes com histórico de locações}{fig:clientes}
+
+\subsection{Veículos}
+A listagem de veículos é feita inteiramente pela rota de filtro \path|/api/filtros/veiculos|. Cada alteração nos filtros (fabricante, categoria, situação e ano mínimo) gera uma nova consulta à API, e a URL utilizada é exibida no painel de filtros. No cadastro, as opções de fabricante e categoria são carregadas do banco de dados.
+
+\tela{veiculos}{Tela de veículos com filtros enviados à API}{fig:veiculos}
+\tela{cadastro}{Janela de cadastro e edição de veículo}{fig:cadastro}
+
+\subsection{Aluguéis e devolução}
+A tela de aluguéis lista todas as locações com o seu status (em aberto, atrasado ou encerrado) e permite abrir um novo aluguel, editar, excluir e registrar a devolução. Esse fluxo é detalhado na Seção~\ref{sec:fluxo}.
+
+\tela{alugueis}{Tela de aluguéis}{fig:alugueis}
+
+\subsection{Relatórios}
+A tela de relatórios organiza em abas as consultas de apoio à gerência: faturamento por categoria (com gráfico de barras), devoluções em atraso, veículos nunca alugados e clientes com o seu histórico de locações.
+
+\tela{relatorios}{Tela de relatórios: faturamento por categoria}{fig:relatorios}
+
+\section{Exemplos de consultas: do banco à tela}
+
+Esta seção mostra dois exemplos do caminho completo de uma consulta: a instrução SQL definida na primeira parte, a rota da API que a implementa e o resultado exibido no front-end.
+
+\subsection{Frota com fabricante e categoria (INNER JOIN)}
+
+A consulta une as tabelas de veículos, fabricantes e categorias para exibir a frota completa:
+
+\begin{lstlisting}[language=SQL]
+SELECT  v.Placa, v.Modelo, f.Nome AS Fabricante, c.Nome AS Categoria,
+        v.AnoFabricacao, v.Quilometragem, c.ValorDiariaBase, v.Disponivel
+FROM        Veiculos          v
+INNER JOIN  Fabricantes       f ON f.Id = v.FabricanteId
+INNER JOIN  CategoriasVeiculo c ON c.Id = v.CategoriaVeiculoId
+ORDER BY    f.Nome, v.Modelo;
+\end{lstlisting}
+
+Na API, ela corresponde à rota \path|GET /api/filtros/veiculos|, que aceita os parâmetros opcionais \texttt{fabricante}, \texttt{categoria}, \texttt{disponivel} e \texttt{anoMinimo}, acrescentando as condições correspondentes à cláusula WHERE. No front-end, a tela de veículos monta a URL a partir dos filtros escolhidos. Por exemplo, ao selecionar o fabricante Toyota e a situação ``Alugado'', a tela chama:
+
+\begin{lstlisting}
+GET /api/filtros/veiculos?fabricante=Toyota&disponivel=false
+\end{lstlisting}
+
+e exibe apenas os veículos da Toyota que estão alugados no momento (Figura~\ref{fig:veiculos}).
+
+\subsection{Faturamento por categoria (INNER JOIN com agregação)}
+
+A consulta soma o faturamento e a quilometragem rodada das locações encerradas, agrupando por categoria:
+
+\begin{lstlisting}[language=SQL]
+SELECT      c.Nome AS Categoria, COUNT(a.Id) AS QtdeLocacoes,
+            SUM(a.ValorTotal) AS Faturamento,
+            SUM(a.KmFinal - a.KmInicial) AS KmRodados
+FROM        Alugueis          a
+INNER JOIN  Veiculos          v ON v.Id = a.VeiculoId
+INNER JOIN  CategoriasVeiculo c ON c.Id = v.CategoriaVeiculoId
+WHERE       a.DataDevolucaoReal IS NOT NULL
+GROUP BY    c.Nome
+ORDER BY    Faturamento DESC;
+\end{lstlisting}
+
+A rota \path|GET /api/filtros/faturamento-por-categoria| devolve essa lista junto com o faturamento geral. No front-end, o resultado aparece na aba de faturamento da tela de relatórios, como gráfico de barras e tabela (Figura~\ref{fig:relatorios}), e o faturamento geral também é usado como indicador na tela inicial. Como a consulta considera apenas locações encerradas, ao registrar uma devolução na tela de aluguéis o valor cobrado passa a aparecer imediatamente nesses dois lugares.
+
+\section{Fluxo de locação e devolução}
+\label{sec:fluxo}
+
+O fluxo principal do sistema envolve três operações, todas feitas pela tela de aluguéis:
+
+\begin{enumerate}
+  \item \textbf{Abertura do aluguel.} A janela de novo aluguel lista os clientes e apenas os veículos disponíveis, obtidos pela rota \path|/api/filtros/veiculos?disponivel=true|. Ao escolher o veículo, a diária é preenchida com o valor da categoria e a tela exibe uma estimativa do valor para o período informado. O envio é feito por \path|POST /api/alugueis|; o back-end registra a quilometragem inicial e marca o veículo como alugado, de forma que ele deixa de aparecer como opção em novos aluguéis.
+  \item \textbf{Acompanhamento.} Enquanto não é devolvido, o aluguel aparece como ``em aberto'' na tela de aluguéis e na tela inicial, e como ``atrasado'' quando a data prevista já passou.
+  \item \textbf{Devolução.} O botão ``Devolver'' abre uma janela com os dados da locação, onde o usuário informa a data de devolução, a quilometragem final e observações. Uma prévia mostra os dias cobrados, a quilometragem rodada e o valor total. Ao confirmar, a tela chama \path|POST /api/alugueis/{id}/devolucao| e exibe o resultado calculado pelo back-end (dias cobrados, diária, valor total e quilometragem rodada). O aluguel passa a ``encerrado'' e o veículo volta a ficar disponível com a quilometragem atualizada.
+\end{enumerate}
+
+\tela{devolucao}{Janela de registro de devolução com o valor calculado}{fig:devolucao}
+
+Um cuidado necessário na edição de aluguéis foi o comportamento do PUT no back-end, que substitui o registro inteiro. Para não apagar campos que não aparecem no formulário, como a data de devolução e o valor total de uma locação encerrada, a tela carrega o aluguel completo pela rota \path|GET /api/alugueis/{id}| e reenvia todos os campos, alterando apenas os que foram editados.
+
+\section{Execução e entrega}
+
+Para executar o sistema, a API deve ser iniciada com o comando abaixo, a partir da raiz do repositório. Em seguida, o arquivo \texttt{frontend/index.html} é aberto com a extensão Live Server do VS Code (endereço \texttt{http://127.0.0.1:5500}).
+
+\begin{lstlisting}
+dotnet run --project LocadoraVeiculos --launch-profile http
+\end{lstlisting}
+
+\begin{itemize}
+  \item \textbf{Repositório:} \url{https://github.com/MarcoTulioGr/LocadoraVeiculos}
+  \item \textbf{Vídeo de apresentação:} \url{https://youtu.be/1Zn8gMjif6I}
+\end{itemize}
+
+\end{document}
